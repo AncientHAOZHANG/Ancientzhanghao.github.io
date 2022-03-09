@@ -1,0 +1,42 @@
+#!/bin/bash
+dat="New_$(date +"%y%m%d")"
+#EIG="/home/WSH/HLB/geno/Xinjiang_EBA.1240KHO.190516"
+#EIG="/home/WFZ/work/Bohai/geno/Ancient_JLU_Bohai.1240k.20210112"
+EIG="/home/WFZ/work/HLB/after_eager/geno/kHO/HLB_BZL_210926.1240kHO"
+POP="/home/WFZ/work/HLB/after_eager/PCA/pca_pop_fan/PCA_210413"
+rm -rf PCA_${dat}
+mkdir -p PCA_${dat}
+cd PCA_${dat}
+add=$(pwd)
+for i in $(ls ${POP}* | awk -F '_' '{print $6}' | awk -F '.' '{print $1}' )
+do
+        echo "genotypename: ${EIG}.geno" > ${dat}_${i}.par
+        echo "snpname: ${EIG}.snp" >> ${dat}_${i}.par
+        echo "indivname: ${EIG}.ind" >> ${dat}_${i}.par
+        echo "evecoutname: ${dat}_${i}.evec" >> ${dat}_${i}.par
+        echo "evaloutname: ${dat}_${i}.eval" >> ${dat}_${i}.par
+        echo "poplistname: ${POP}_${i}.pops">> ${dat}_${i}.par
+    echo -e "altnormstype: NO\nnumoutevec: 20\nnumoutlieriter: 0\nnumoutlierevec: 0" >> ${dat}_${i}.par
+    echo -e "outliersigmathresh: 6.0\nnumthreads: 8\nqtmode: 0\nlsqproject: YES" >> ${dat}_${i}.par
+    echo -e "autoshrink: YES" >> ${dat}_${i}.par
+    echo smartpca -p ${add}/${dat}_${i}.par > ${dat}_${i}.sh
+    chmod 755 ${dat}_${i}.sh
+
+done
+###run##
+
+#for i in *.par;do echo "smartpca -p $i > $i.log" > PCA.$i.sh;done
+#chmod u+x *.sh
+#for i in *.sh;do qsub -V -cwd -l vf=64G -l hostname=cu* $i;done
+
+
+
+# for i in $(ls *.sh)
+#do
+	#qsub -V -cwd -l hostname=cu* $i
+#done
+
+
+#python3 /home/WSH/HLB/PCA/multi_v3.6.py -i "*.sh" -k bash
+##make a tar file 
+#python3 /home/WSH/HLB/PCA/eigenstrat_output_trimmer_160222.py ${dat} $(ls ${dat}_*.evec | awk -F '_' '{print $2}'| awk -F '.' '{ print $1 }' | tail -1)
